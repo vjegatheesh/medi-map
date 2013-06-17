@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+<script type="text/javascript">
+$(function(){
+  $('#map').gmap3({
+    map:{
+      options:{
+        center:[13.0004220,80.2495830],
+        zoom: 10,
+      }
+    },
+    marker:{
+      values:[
+      {% for x in devices recursive %}
+         {
+            latLng:[{{ x.latitude }},{{ x.longitude }}], 
+            id:"{{ x.devid }}", 
+            address:"{{ x.address }}",
+            data:{name:"{{ x.devname }}",health:"{{ x.health }}",key:"{{ x.key }}" },
+            options:{icon: getIcon("{{ x.health }}")}
+         },
+      {% endfor %}
+      ],
+      options:{
+        draggable: false
+      },
+      events: {
+        click: function(marker, event, context){
+          console.log(context);
+          markerSelected(context);
+          $(this).gmap3({
+          getaddress:{
+            latLng:marker.getPosition(),
+            callback:function(results){
+              var map = $(this).gmap3("get"),
+                content = results && results[1] ? results && results[1].formatted_address : "no address";
+                $("#address").val(content);
+            }
+          }
+          });
+        }
+      }
+    }
+  });
+});
+      
+function markerSelected(con){
+  var id = con.id
+  var marker = $('#map').gmap3({get:id});
+  $("#devkey").val(con.data.key.split(", ")[1].replace(")",""));
+  $("#devid").val(id);
+  $("#devname").val(con.data.name);
+  $("#health").val(con.data.health);
+  $("#latitude").val(marker.getPosition().lat());
+  $("#longitude").val(marker.getPosition().lng());
+}
+</script>
+
+{% endblock %}
+{% block content %}
+<div id="map" class="gmap3"></div>
+<div id="tool">
+  <div id="add-device">
+    <form class="form-horizontal" id="frm-device">
+      <input type="hidden" id="devkey">    
+      <div class="control-group">
+        <label class="control-label" for="devid">Device Id</label>
+        <div class="controls">
+          <input type="text" id="devid" placeholder="Device Id">
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="devname">Name</label>
+        <div class="controls">
+          <input type="text" id="devname" placeholder="Name">
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="latitude">Latitude</label>
+        <div class="controls">
+          <input type="text" id="latitude" placeholder="Latitude">
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="longitude">Longitude</label>
+        <div class="controls">
+          <input type="text" id="longitude" placeholder="Longitude">
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="longitude">Address</label>
+        <div class="controls">
+          <textarea id="address" placeholder="Address"></textarea>
+        </div>
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="health">Health</label>
+        <div class="controls">
+          <select id="health" >
+               <option value="Normal">Normal</option>
+               <option value="Mainatenance Required">Mainatenance Required</option>
+               <option value="Broken">Broken</option>
+          </select>
+        </div>
+      </div>
+      <div class="control-group">
+        <div class="controls">
+          <button type="button" onclick="addUpdateDevice(); return false;" class="btn btn-primary">Add/Update Device</button> <button type="button" onclick="resetForm()" class="btn btn-primary">Reset</button>
+        </div>
+      </div>
+    </form>
+  </div> <!-- end of add device --> 
+</div><!-- end of tool -->
+{% endblock %}

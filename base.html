@@ -1,0 +1,111 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <script src="http://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+    <script type="text/javascript" src="js/gmap3.min.js"></script> 
+    <title>{% block title %}{% endblock %} - Medmap</title>
+    <style>
+      body{
+        text-align:center;
+      }
+      #content{
+        overflow: auto;
+        margin: 20px auto;
+        width: 940px;
+      }
+      .gmap3, #tool{
+        border: 1px dashed #C0C0C0;
+        float: left;
+      }
+      .gmap3 {
+        width: 500px;
+        height: 500px;
+      }
+      #tool{
+        margin-left: 10px;
+        width: 400px;
+        height: 490px;
+        padding: 5px;
+        text-align:left;
+      }
+      #data{
+        display: none;
+      }
+      #add-device{
+      }
+    </style>
+    <script>
+    function addUpdateDevice() {
+          var devdata = {};
+          $("form#frm-device input, form#frm-device textarea, form#frm-device select").each(function () {
+              var id = $(this).attr("id");
+              var val = $(this).val();
+              if (id) {
+                devdata[id] = val;
+              }
+          });
+          $.post("./ajax/save", devdata, function (data) {
+            alert("Data Saved"); 
+            location.reload();
+          });
+        }
+
+        function resetForm() {
+          $("form#frm-device input, form#frm-device textarea, form#frm-device select").val("");
+          $("form#frm-device select").val("Normal");
+        }
+
+
+        function getIcon(health) {
+          switch (health) {
+            case "Normal" :
+              return "http://maps.google.com/mapfiles/kml/pal2/icon28.png";
+            case "Mainatenance Required" :
+              return "http://maps.google.com/mapfiles/kml/pal3/icon34.png";
+            case "Broken" :
+              return "http://maps.google.com/mapfiles/kml/pal3/icon39.png";
+          }
+        }
+    </script>
+    {% block head %}
+    
+    {% endblock %}
+</head>
+<body>
+  <div id="content">
+  <div class="masthead">
+        <ul class="nav nav-pills pull-right">
+          <li id="home"><a href="./">Home</a></li>
+          <li id="manage"><a href="./manage">Manage Device</a></li>
+          <li id="aboutus"><a href="#">About Us</a></li>
+        </ul>
+        <h3 class="muted">Medimap</h3>
+      </div>
+  <div class="clearfix"></div>
+  {% block content %}{% endblock %}
+  </div>
+  <div class="clearfix"></div>
+    <div class="footer">
+      <p>&copy; Medimap 2013</p>
+    </div>
+   </div> 
+</body>
+</html>
+<script>
+$(function(){
+ //Updating the current menu.
+ var segment = window.location.href.split("/");
+ if(typeof (segment[3]) ==='undefined' || segment[3] === "" ) {
+    $("#home").addClass("active")
+ } else {
+    $("#"+segment[3]).addClass("active")
+ }
+});
+</script>
+
+
+

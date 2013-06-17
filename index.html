@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+<script type="text/javascript">
+$(function(){
+  $('#map').gmap3({
+    map:{
+      options:{
+        center:[13.0004220,80.2495830],
+        zoom: 10
+      }
+    },
+    marker:{
+      values:[
+      {% for key in devices recursive %}
+         {
+            latLng:[{{ key.latitude }},{{ key.longitude }}], 
+            id:"{{ key.devid }}", 
+            address:"{{ key.address }}",
+            data:{name:"{{ key.devname }}",health:"{{ key.health }}"},
+            options:{icon: getIcon("{{ key.health }}")}
+         },
+      {% endfor %}
+      ],
+      options:{
+        draggable: false
+      },
+      events: {
+        click: function(marker, event, context){
+          markerSelected(context);
+          $(this).gmap3({
+          getaddress:{
+            latLng:marker.getPosition(),
+            callback:function(results){
+              var map = $(this).gmap3("get"),
+                content = results && results[1] ? results && results[1].formatted_address : "no address";
+                $("#address .value").text(content+" (reverse geo-coding).");
+            }
+          }
+          });
+        }
+      }
+    }
+  });
+});
+      
+function markerSelected(con){
+  var id = con.id
+  var marker = $('#map').gmap3({get:id});
+  $("#markerId .value").text(id);
+  $("#devname .value").text(con.data.name);
+  $("#latitude .value").text(marker.getPosition().lat());
+  //$("#latitude .value").text(marker.getaddress());
+  $("#longitude .value").text(marker.getPosition().lng());
+  $("#health .value").text(con.data.health);
+  $("#data").show();
+  //$("#title").hide();
+}
+</script>
+{% endblock %}
+{% block content %}
+<div id="map" class="gmap3"></div>
+<div id="tool">
+  <div id="title"><h4>Click On a Device</h4></div>
+  <div id="data">
+    <div id="markerId">
+      <span class="label">ID : </span>
+      <span class="value"></span>
+    </div>
+    <div id="devname">
+      <span class="label">Name </span>
+      <span class="value"></span>
+    </div>
+    <div id="latitude">
+      <span class="label">Latitude : </span>
+      <span class="value"></span>
+    </div>
+    <div id="longitude">
+      <span class="label">Longitude : </span>
+      <span class="value"></span>
+    </div>
+    <div id="address">
+      <span class="label">Address  : </span>
+      <span class="value"></span>
+    </div>
+    <div id="health">
+      <span class="label">Health  : </span>
+      <span class="value"></span>
+    </div>
+  </div><!-- end of data -->
+</div><!-- end of tool -->
+{% endblock %}
